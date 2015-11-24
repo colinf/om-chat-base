@@ -7,6 +7,7 @@
             [cljs-time.coerce :as dt2]))
 
 (enable-console-print!)
+
 (def raw-data [
                {
                 :id "m_1"
@@ -93,10 +94,29 @@
       ))
   )
 
+(defui MessageSection
+  static om/Ident
+  (ident [this {:keys [message/id]}]
+         [:messages/by-id id])
+  static om/IQuery
+  (query [this]
+         [:message/id :message/author-name :message/date :message/text])
+  Object
+  (render [this]
+          (dom/div #js{:className "message-section"}
+                   "Message section...")))
+
+(def message-section (om/factory MessageSection))
+
 (defui ThreadSection
   static om/Ident
   (ident [this {:keys [thread/id]}]
          [:threads/by-id id])
+  static om/IQuery
+  (query [this]
+         [:thread/id :thread/name :thread/read :thread/selected
+                     {:thread/last-message [:message/date :message/text]}
+                     {:thread/messages (om/get-query MessageSection)}])
   Object
   (render [this]
           (dom/div #js{:className "thread-section"}
@@ -105,38 +125,26 @@
 
 (def thread-section (om/factory ThreadSection))
 
-(defui MessageSection
-  static om/Ident
-  (ident [this {:keys [message/id]}]
-         [:messages/by-id id])
-  Object
-  (render [this]
-          (dom/div #js{:className "message-section"}
-                   "Message section...")))
-
-(def message-section (om/factory MessageSection))
-
-
 (defui ChatApp
   static om/IQuery
   (query [this]
-         [{:threads [:thread/id :thread/name :thread/read :thread/selected
-                     {:thread/last-message [:message/date :message/text]}
-                     {:thread/messages [:message/id :message/author-name :message/date :message/text]}]}])
+         [{:threads (om/get-query ThreadSection)}])
   Object
   (render [this]
           (let [{:keys [threads]} (om/props this)]
             (dom/div #js{:className "chatapp"}
-                     (thread-section)
-                     (message-section)))))
+                     (thread-section threads)
+                     (message-section (last threads))))))
 
 (defmulti read om/dispatch)
+
 (defmethod read :default
   [{:keys [state] :as env} k _]
   (let [st @state]
     (if (contains? st k)
       {:value (get st k)}
       {:remote true})))
+
 
 (def reconciler
   (om/reconciler {:state {:threads (reduce threads [] raw-data)}
