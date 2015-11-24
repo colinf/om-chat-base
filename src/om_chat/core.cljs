@@ -3,8 +3,6 @@
   (:require [goog.dom :as gdom]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
-            [om-chat.components.root :as root]
-            [om-chat.parser :as p]
             [cljs-time.core :as dt]
             [cljs-time.coerce :as dt2]))
 
@@ -132,12 +130,18 @@
                      (thread-section)
                      (message-section)))))
 
+(defmulti read om/dispatch)
+(defmethod read :default
+  [{:keys [state] :as env} k _]
+  (let [st @state]
+    (if (contains? st k)
+      {:value (get st k)}
+      {:remote true})))
+
 (def reconciler
   (om/reconciler {:state {:threads (reduce threads [] raw-data)}
-                  :parser (om/parser {:read p/read :mutate p/mutate})}))
+                  :parser (om/parser {:read read})}))
 
 (om/add-root! reconciler
-              root/ChatApp
+              ChatApp
               (gdom/getElement "app"))
-
-(om/transact! reconciler `[(thread/select {:thread/id "t_3"}) :threads])
