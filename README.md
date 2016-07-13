@@ -2,7 +2,7 @@
 
 This is a base project which can be used as a starting point for the following example:
 
-* Om Next Normalization (*coming soon!*)
+* [Om Next Normalization](https://medium.com/@softwarecf/om-next-normalisation-7db6f2a8f89f#.5xln9qg7r)
 
 ## License
 
