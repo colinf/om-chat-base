@@ -1,6 +1,6 @@
 # Base project for Om Next Flux Chat examples
 
-This is a base project which can be used as a starting point for the following example:
+This is a base project which can be used as a starting point for the following article:
 
 * [Om Next Normalization](https://medium.com/@softwarecf/om-next-normalisation-7db6f2a8f89f#.5xln9qg7r)
 
